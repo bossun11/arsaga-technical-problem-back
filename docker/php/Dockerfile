@@ -1,17 +1,11 @@
-FROM php:8.2-apache
+FROM php:8.2-fpm
 
-COPY ./docker/php/php.ini /usr/local/etc/php/php.ini
+COPY ./docker/php/php.ini /usr/local/etc/php/
 
-RUN apt-get update \
-    && apt-get -y install git zip unzip vim
-
-RUN docker-php-ext-install pdo_mysql
+RUN apt-get update && apt-get install -y git zip unzip vim \
+    && docker-php-ext-install pdo_mysql
 
 # composerのインストール
-RUN cd /usr/bin && curl -s http://getcomposer.org/installer | php && ln -s /usr/bin/composer.phar /usr/bin/composer
+RUN curl -s http://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
 
 WORKDIR /var/www/html
-
-EXPOSE 8000
-
-CMD ["php","artisan","serve","--host","0.0.0.0"]
