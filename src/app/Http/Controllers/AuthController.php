@@ -61,4 +61,12 @@ class AuthController extends Controller
 
     return response()->json('認証に失敗しました', Response::HTTP_UNAUTHORIZED);
   }
+
+  // ログアウト
+  public function logout(Request $request) {
+    $request->user()->tokens()->delete();
+    Auth::guard("web")->logout();
+    $cookie = \Cookie::forget('laravel_session');
+    return response()->json('ログアウトしました', Response::HTTP_OK)->withCookie($cookie);
+  }
 }
