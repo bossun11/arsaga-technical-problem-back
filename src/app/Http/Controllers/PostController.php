@@ -10,6 +10,14 @@ use Illuminate\Support\Facades\Auth;
 
 class PostController extends Controller
 {
+  public function index() {
+    $posts = Post::with("user")->
+      orderBy("created_at", "desc")->
+      paginate(10);
+
+    return response()->json($posts, Response::HTTP_OK);
+  }
+
   public function store(Request $request) {
     $request->validate([
       "title" => ["required", "string", "max:255"],
