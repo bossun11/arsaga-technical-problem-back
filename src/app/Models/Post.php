@@ -19,4 +19,18 @@ class Post extends Model
   public function user() {
     return $this->belongsTo(User::class);
   }
+
+  public function getAllPosts() {
+    return Post::with("user")->
+      orderBy("created_at", "desc")->
+      paginate(15);
+  }
+
+  public function getPostById($id) {
+    return Post::with("user")->find($id);
+  }
+
+  public function createPost($postData) {
+    return Post::create($postData);
+  }
 }
