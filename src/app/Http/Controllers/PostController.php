@@ -13,9 +13,19 @@ class PostController extends Controller
   public function index() {
     $posts = Post::with("user")->
       orderBy("created_at", "desc")->
-      paginate(10);
+      paginate(15);
 
     return response()->json($posts, Response::HTTP_OK);
+  }
+
+  public function show($id) {
+    $post = Post::with("user")->find($id);
+
+    if (!$post) {
+      return response()->json(["message" => "投稿が見つかりませんでした。"], Response::HTTP_NOT_FOUND);
+    }
+
+    return response()->json($post, Response::HTTP_OK);
   }
 
   public function store(Request $request) {
