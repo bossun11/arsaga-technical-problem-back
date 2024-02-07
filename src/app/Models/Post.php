@@ -34,6 +34,12 @@ class Post extends Model
     return Post::create($postData);
   }
 
+  public function updatePostById($id, $postData) {
+    $post = Post::with("user")->find($id);
+    $post->fill($postData)->save();
+    return $post;
+  }
+
   public function deletePostById($id) {
     return Post::find($id)->destroy($id);
   }
