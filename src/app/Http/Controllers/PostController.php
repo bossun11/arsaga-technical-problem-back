@@ -43,4 +43,9 @@ class PostController extends Controller
     $post = $this->post->createPost($postData);
     return response()->json($post, Response::HTTP_CREATED);
   }
+
+  public function destroy($id) {
+    $this->post->deletePostById($id);
+    return response()->json(Response::HTTP_NO_CONTENT);
+  }
 }
