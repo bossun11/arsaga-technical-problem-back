@@ -44,6 +44,12 @@ class PostController extends Controller
     return response()->json($post, Response::HTTP_CREATED);
   }
 
+  public function update(PostRequest $request, $id) {
+    $postData = $request->validated();
+    $post = $this->post->updatePostById($id, $postData);
+    return response()->json($post, Response::HTTP_OK);
+  }
+
   public function destroy($id) {
     $this->post->deletePostById($id);
     return response()->json(Response::HTTP_NO_CONTENT);
