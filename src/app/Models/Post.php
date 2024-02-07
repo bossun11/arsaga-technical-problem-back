@@ -33,4 +33,8 @@ class Post extends Model
   public function createPost($postData) {
     return Post::create($postData);
   }
+
+  public function deletePostById($id) {
+    return Post::find($id)->destroy($id);
+  }
 }
