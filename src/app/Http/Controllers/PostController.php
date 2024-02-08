@@ -6,6 +6,7 @@ use App\Models\Post;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Requests\PostRequest;
+use App\Http\Requests\SearchPostsByTagRequest;
 // use Illuminate\Support\Facades\Storage;
 
 class PostController extends Controller
@@ -53,5 +54,15 @@ class PostController extends Controller
   public function destroy($id) {
     $this->post->deletePostById($id);
     return response()->json(Response::HTTP_NO_CONTENT);
+  }
+
+  public function searchByTag(SearchPostsByTagRequest $request) {
+    $tagName = $request->input("tag_name");
+    $posts = $this->post->findByTag($tagName);
+    if ($posts->isEmpty()) {
+      return response()->json(["message" => "投稿が見つかりませんでした。"], Response::HTTP_OK);
+    }
+
+    return response()->json($posts, Response::HTTP_OK);
   }
 }

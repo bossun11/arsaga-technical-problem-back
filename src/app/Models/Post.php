@@ -47,4 +47,10 @@ class Post extends Model
   public function deletePostById($id) {
     return Post::find($id)->destroy($id);
   }
+
+  public function findByTag($tagName) {
+    return Post::whereHas("tags", function ($query) use ($tagName) {
+      $query->where("name", "LIKE", "%{$tagName}%");
+    })->with(["user", "tags"])->orderBy("created_at", "desc")->paginate(15);
+  }
 }
