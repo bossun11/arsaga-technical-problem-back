@@ -26,7 +26,7 @@ class Post extends Model
 
   public function getAllPosts() {
     return Post::with(["user:id,name", "tags:id,name"])->
-      orderBy("created_at", "desc")->
+      latest()->
       paginate(15);
   }
 
@@ -51,6 +51,6 @@ class Post extends Model
   public function findByTag($tagName) {
     return Post::whereHas("tags", function ($query) use ($tagName) {
       $query->where("name", "LIKE", "%{$tagName}%");
-    })->with(["user:id,name", "tags:id,name"])->orderBy("created_at", "desc")->paginate(15);
+    })->with(["user:id,name", "tags:id,name"])->latest()->paginate(15);
   }
 }
