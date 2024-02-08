@@ -25,13 +25,13 @@ class Post extends Model
   }
 
   public function getAllPosts() {
-    return Post::with("user")->
+    return Post::with(["user:id,name", "tags:id,name"])->
       orderBy("created_at", "desc")->
       paginate(15);
   }
 
   public function getPostById($id) {
-    return Post::with("user")->find($id);
+    return Post::with(["user:id,name", "tags:id,name"])->find($id);
   }
 
   public function createPost($postData) {
@@ -39,7 +39,7 @@ class Post extends Model
   }
 
   public function updatePostById($id, $postData) {
-    $post = Post::with("user")->find($id);
+    $post = Post::with("user:id,name")->find($id);
     $post->fill($postData)->save();
     return $post;
   }
@@ -51,6 +51,6 @@ class Post extends Model
   public function findByTag($tagName) {
     return Post::whereHas("tags", function ($query) use ($tagName) {
       $query->where("name", "LIKE", "%{$tagName}%");
-    })->with(["user", "tags"])->orderBy("created_at", "desc")->paginate(15);
+    })->with(["user:id,name", "tags:id,name"])->orderBy("created_at", "desc")->paginate(15);
   }
 }
