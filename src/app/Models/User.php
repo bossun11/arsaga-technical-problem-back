@@ -49,7 +49,7 @@ class User extends Authenticatable
   }
 
   public function createUser($registerData) {
-    return User::create([
+    return $this->create([
       "name" => $registerData["name"],
       "email" => $registerData["email"],
       "password" => Hash::make($registerData["password"]),
@@ -57,7 +57,7 @@ class User extends Authenticatable
   }
 
   public function loginUser($loginData) {
-    return User::where("email", $loginData["email"])->first();
+    return $this->where("email", $loginData["email"])->first();
   }
 
   public function generateAuthToken() {
