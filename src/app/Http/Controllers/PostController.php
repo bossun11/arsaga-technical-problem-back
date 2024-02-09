@@ -48,7 +48,8 @@ class PostController extends Controller
 
   public function update(PostRequest $request, $id) {
     $postData = $request->validated();
-    $post = $this->post->updatePostById($id, $postData);
+    $tags = $postData["tags"];
+    $post = $this->post->updatePostById($id, $postData, $tags);
     return response()->json($post, Response::HTTP_OK);
   }
 
