@@ -34,8 +34,18 @@ class Post extends Model
     return Post::with(["user:id,name", "tags:id,name"])->find($id);
   }
 
-  public function createPost($postData) {
-    return Post::create($postData);
+  public function createPost($postData, $tags = []) {
+    $post = Post::create($postData);
+
+    if (!empty($tags)) {
+      $tagIds = [];
+      foreach ($tags as $tagName) {
+        $tag = Tag::firstOrCreate(["name" => $tagName]);
+        $tagIds[] = $tag->id;
+      }
+      $post->tags()->sync($tagIds);
+    }
+    return $post;
   }
 
   public function updatePostById($id, $postData) {

@@ -41,7 +41,8 @@ class PostController extends Controller
     //   $postData['image'] = Storage::url($path);
     // }
 
-    $post = $this->post->createPost($postData);
+    $tags = $postData["tags"];
+    $post = $this->post->createPost($postData, $tags);
     return response()->json($post, Response::HTTP_CREATED);
   }
 
