@@ -18,28 +18,23 @@ class AuthController extends Controller
     $this->user = new User();
   }
 
-    // ユーザー登録
   public function register(RegisterRequest $request) {
     $registerData = $request->validated();
     $user = $this->user->createUser($registerData);
     return response()->json($user, Response::HTTP_CREATED);
   }
 
-  // ログイン
   public function login(LoginRequest $request) {
     $loginData = $request->validated();
-
     if (Auth::attempt($loginData)) {
       $user = $this->user->loginUser($loginData);
       $token = $user->generateAuthToken();
-
-      return response()->json($token, Response::HTTP_OK);
+      return response()->json(["token" => $token, "user" => $user], Response::HTTP_OK);
     }
 
     return response()->json('認証に失敗しました', Response::HTTP_UNAUTHORIZED);
   }
 
-  // ログアウト
   public function logout(Request $request) {
     $request->user()->deleteAuthTokens();
     Auth::guard("web")->logout();

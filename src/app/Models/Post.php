@@ -9,6 +9,8 @@ class Post extends Model
 {
   use HasFactory;
 
+  const PAGINATION_COUNT = 15;
+
   protected $fillable = [
     "user_id",
     "title",
@@ -20,27 +22,51 @@ class Post extends Model
     return $this->belongsTo(User::class);
   }
 
+  public function tags() {
+    return $this->belongsToMany(Tag::class);
+  }
+
   public function getAllPosts() {
-    return Post::with("user")->
-      orderBy("created_at", "desc")->
-      paginate(15);
+    return $this->with(["user:id,name", "tags:id,name"])->
+      latest()->
+      paginate(self::PAGINATION_COUNT);
   }
 
   public function getPostById($id) {
-    return Post::with("user")->find($id);
+    return $this->with(["user:id,name", "tags:id,name"])->find($id);
   }
 
-  public function createPost($postData) {
-    return Post::create($postData);
+  public function createPost($postData, $tags = []) {
+    $post = $this->create($postData);
+    $this->syncTags($post, $tags);
+    return $post;
   }
 
-  public function updatePostById($id, $postData) {
-    $post = Post::with("user")->find($id);
+  public function updatePostById($id, $postData, $tags = []) {
+    $post = $this->with("user:id,name")->find($id);
     $post->fill($postData)->save();
+    $this->syncTags($post, $tags);
+    $post = $this->with(["user:id,name", "tags:id,name"])->find($post->id);
     return $post;
   }
 
   public function deletePostById($id) {
-    return Post::find($id)->destroy($id);
+    return $this->find($id)->destroy($id);
+  }
+
+  public function findByTag($tagName) {
+    return $this->whereHas("tags", function ($query) use ($tagName) {
+      $query->where("name", "LIKE", "%{$tagName}%");
+    })->with(["user:id,name", "tags:id,name"])->latest()->paginate(self::PAGINATION_COUNT);
+  }
+
+  // 投稿とタグのリレーションを同期
+  protected function syncTags($post, $tags) {
+    $tagIds = [];
+    foreach ($tags as $tagName) {
+      $tag = Tag::firstOrCreate(["name" => $tagName]);
+      $tagIds[] = $tag->id;
+    }
+    $post->tags()->sync($tagIds);
   }
 }
