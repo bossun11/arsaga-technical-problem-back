@@ -62,7 +62,7 @@ class PostController extends Controller
     $tagName = $request->input("tag_name");
     $posts = $this->post->findByTag($tagName);
     if ($posts->isEmpty()) {
-      return response()->json(["message" => "投稿が見つかりませんでした。"], Response::HTTP_OK);
+      return response()->json(["data" => []], Response::HTTP_OK);
     }
 
     return response()->json($posts, Response::HTTP_OK);
