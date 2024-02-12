@@ -7,7 +7,6 @@ use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Requests\PostRequest;
 use App\Http\Requests\SearchPostsByTagRequest;
-use Illuminate\Support\Facades\Storage;
 
 class PostController extends Controller
 {
@@ -37,8 +36,7 @@ class PostController extends Controller
     $tags = $postData["tags"] ?? [];
 
     if ($request->hasFile("image")) {
-      $path = $request->file("image")->store("images", "s3");
-      $postData['image'] = Storage::disk("s3")->url($path);
+      $postData["image"] = $this->post->uploadImageToS3($request->file("image"));
     }
 
     $post = $this->post->createPost($postData, $tags);
@@ -48,14 +46,11 @@ class PostController extends Controller
   public function update(PostRequest $request, $id) {
     $postData = $request->validated();
     $post = $this->post->getPostById($id);
-    $tags = $postData["tags"];
+    $tags = $postData["tags"] ?? [];
 
     if ($request->hasFile('image')) {
-      // 画像のURLからファイルパスを抽出
-      $oldImagePath = parse_url($post->image, PHP_URL_PATH);
-      Storage::disk('s3')->delete($oldImagePath);
-      $path = $request->file('image')->store('images', 's3');
-      $postData['image'] = Storage::disk('s3')->url($path);
+      $post->deleteImageFromS3($post->image);
+      $postData['image'] = $this->post->uploadImageToS3($request->file('image'));
     }
 
     $post = $this->post->updatePostById($id, $postData, $tags);

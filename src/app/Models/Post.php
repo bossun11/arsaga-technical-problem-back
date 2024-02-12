@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Storage;
 
 class Post extends Model
 {
@@ -51,7 +52,11 @@ class Post extends Model
   }
 
   public function deletePostById($id) {
-    return $this->find($id)->destroy($id);
+    $post = $this->find($id);
+    if ($post->image) {
+      $this->deleteImageFromS3($post->image);
+    }
+    return $post->destroy($id);
   }
 
   public function findByTag($tagName) {
@@ -59,6 +64,16 @@ class Post extends Model
       $query->where("name", "LIKE", "%{$tagName}%");
     })->with(["user:id,name", "tags:id,name"])->latest()->paginate(self::PAGINATION_COUNT);
   }
+
+  public function uploadImageToS3($image) {
+    $path = $image->store('images', 's3');
+    return Storage::disk('s3')->url($path);
+}
+
+  public function deleteImageFromS3($imageUrl) {
+      // 画像のURLからファイルパスを抽出
+    $imagePath = parse_url($imageUrl, PHP_URL_PATH);
+    Storage::disk("s3")->delete($imagePath);}
 
   // 投稿とタグのリレーションを同期
   protected function syncTags($post, $tags) {
