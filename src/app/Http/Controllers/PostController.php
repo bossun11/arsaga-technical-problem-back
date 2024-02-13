@@ -7,7 +7,6 @@ use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Requests\PostRequest;
 use App\Http\Requests\SearchPostsByTagRequest;
-// use Illuminate\Support\Facades\Storage;
 
 class PostController extends Controller
 {
@@ -34,21 +33,26 @@ class PostController extends Controller
   public function store(PostRequest $request) {
     $postData = $request->validated();
     $postData["user_id"] = Auth::id();
+    $tags = $postData["tags"] ?? [];
 
-    // ローカルストレージに画像を保存するとCORSエラーが発生するため、一旦コメントアウト
-    // if ($request->hasFile("image")) {
-    //   $path = $request->file("image")->store('public');
-    //   $postData['image'] = Storage::url($path);
-    // }
+    if ($request->hasFile("image")) {
+      $postData["image"] = $this->post->uploadImageToS3($request->file("image"));
+    }
 
-    $tags = $postData["tags"];
     $post = $this->post->createPost($postData, $tags);
     return response()->json($post, Response::HTTP_CREATED);
   }
 
   public function update(PostRequest $request, $id) {
     $postData = $request->validated();
-    $tags = $postData["tags"];
+    $post = $this->post->getPostById($id);
+    $tags = $postData["tags"] ?? [];
+
+    if ($request->hasFile('image')) {
+      $post->deleteImageFromS3($post->image);
+      $postData['image'] = $this->post->uploadImageToS3($request->file('image'));
+    }
+
     $post = $this->post->updatePostById($id, $postData, $tags);
     return response()->json($post, Response::HTTP_OK);
   }
